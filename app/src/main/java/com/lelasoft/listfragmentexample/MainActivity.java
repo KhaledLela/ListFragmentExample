@@ -1,9 +1,13 @@
 package com.lelasoft.listfragmentexample;
 
+import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,24 +20,40 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        updateContainerFrame(new LearnFragment());
     }
 
     public void updateContainerFrame(Fragment fragment){
         getSupportFragmentManager().beginTransaction()
+                .addToBackStack(fragment.getClass().getSimpleName())
                 .replace(R.id.container_frame, fragment)
-                .commit();
+                .commitAllowingStateLoss();
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 1){
+            fragmentManager.popBackStackImmediate();
+        }else {
+            super.onBackPressed();
+        }
     }
 
     public static class LearnFragment extends ListFragment {
+        private static final String TAG = "My_Logger";
         int mCurCheckPosition = 0;
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                    inflater.getContext(), android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.Titles));
-            setListAdapter(adapter);
-            return super.onCreateView(inflater, container, savedInstanceState);
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            Log.d(TAG,"onActivityCreated Called");
+            if (getActivity() instanceof MainActivity){
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,
+                        getResources().getStringArray(R.array.titles));
+                setListAdapter(adapter);
+                Log.d(TAG,"onActivityCreated Called : Activity Is Not Null");
+            }
         }
 
         @Override
